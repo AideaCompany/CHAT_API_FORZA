@@ -26,7 +26,32 @@ router.post("/send_template", async (req: Request, res: Response) => {
     res.status(200).json({ ok: true });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ ok: false });
+    res.status(500).json({ ok: false, msg: error });
+  }
+});
+
+router.post("/send_template_params", async (req: Request, res: Response) => {
+  debug("Sending templates");
+  try {
+    const { to, template, lang, variables } = req.body;
+    let number = to;
+    let params = [];
+    for (const property in variables) {
+      params.push({ type: "text", text: variables[property] });
+    }
+
+    if (to.charAt(0) === "+") {
+      number = to.substring(1);
+    }
+
+    // number = "573212214921";
+    const result = await bot.sendTemplate(number, template, lang, [
+      { type: "body", parameters: params as any },
+    ]);
+    res.status(200).json({ ok: true, result });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ ok: false, msg: error });
   }
 });
 
