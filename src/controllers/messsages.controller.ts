@@ -60,7 +60,7 @@ router.post("/send_mssg", async (req: Request, res: Response) => {
  * @openapi
  * /send_template:
  *  post:
- *    summary: Send a plain text message
+ *    summary: Send a template
  *    tags:
  *       - "Messages"
  *    requestBody:
