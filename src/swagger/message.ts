@@ -50,7 +50,17 @@
  *          description: Lang code for template
  *        components:
  *          type: array
- *          description: Components check
+ *          description: Components Object ref https://developers.facebook.com/docs/whatsapp/cloud-api/reference/messages#components-object
+ *          items:
+ *              type: object
+ *              properties:
+ *                  type:
+ *                      type: string
+ *                      enum : ["header","body","footer"]
+ *                      description: Component type
+ *                  parameters:
+ *                      type: array
+ *                      description: Parameter Object ref https://developers.facebook.com/docs/whatsapp/cloud-api/reference/messages#parameter-object
  *      example:
  *          to: "50412345678"
  *          template: "hello_world"
