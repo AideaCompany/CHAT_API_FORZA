@@ -1,94 +1,94 @@
-import cors from "cors";
-import express from "express";
-import actuator from "express-actuator";
-import logger from "morgan";
-import path from "path";
-import { getVariableSync } from "./config";
-import debugLib from "debug";
-import cookieParser from "cookie-parser";
-import swaggerJsDocs from "swagger-jsdoc";
-import swaggerUI from "swagger-ui-express";
-// controllers
-import MessageControllers from "./controllers/messsages.controller";
-import { bot } from "./utilities/bot";
+#!/usr/bin/env node
 
-const debug = debugLib("Aidea:server");
-const apiPath = getVariableSync("API_PATH") || "";
-const fullApiPath = `${apiPath}/V1`;
+/**
+ * Module dependencies.
+ */
+import debugLib from 'debug'
+import http from 'http'
+import app from './app'
+import sio from './utilities/socket'
+import { getVariableSync } from './config'
+ 
+ const debug = debugLib('AIDEA:server')
+ let server: http.Server | undefined
+ let port: string | number | false
+   ; (async () => {
+     try {
+       /**
+        * Get port from environment and store in Express.
+        */
+       port = normalizePort(getVariableSync('PORT' as string) || '3000')
+       app.set('port', port)
+       debug('Port set to:', port)
+       /**
+        * Create HTTP server.
+        */
+       server = http.createServer(app)
+       sio.init(server)
+       debug('Server created')
+ 
+       /**
+        * Listen on provided port, on all network interfaces.
+        */
+       server.listen(port)
+       server.on('error', onError)
+       server.on('listening', onListening)
+ 
+     } catch (error) {
+       debug('[ERROR] Could not start application: ', error)
+     }
+   })()
+ 
+ /**
+  * Normalize a port into a number, string, or false.
+  */
+ 
+ function normalizePort(val: string) {
+   const nPort = parseInt(val, 10)
+   if (isNaN(nPort)) {
+     return val
+   }
+   if (nPort >= 0) {
+     return nPort
+   }
+   return false
+ }
+ 
+ /**
+  * Event listener for HTTP server 'error' event.
+  */
+ 
+ function onError(error: any) {
+   if (error.syscall !== 'listen') {
+     throw error
+   }
+ 
+   const bind = typeof port === 'string' ? `Pipe ${port}` : `Port ${port}`
+ 
+   // handle specific listen errors with friendly messages
+   switch (error.code) {
+     case 'EACCES':
+       console.error(`${bind} requires elevated privileges`)
+       process.exit(1)
 
-const swaggerOptions = {
-  swaggerDefinition: {
-    openapi: "3.0.0",
-    info: {
-      title: "WHATSAPP API",
-      description: "Endpoints WhatsApp API Aidea",
-      contact: {
-        name: "Sergio Sanchez",
-      },
-      version: "0.0.1",
-    },
-    // servers: [
-    //   {
-    //     url: `${getVariableSync('BACKEND_URL')}${getVariableSync('API_PATH')}/V1`
-    //   }
-    // ]
-  },
-  apis: [`${__dirname}/controllers/*.js`, `${__dirname}/swagger/*.js`],
-};
+     case 'EADDRINUSE':
+       console.error(`${bind} is already in use`)
+       process.exit(1)
 
-const swaggerDocs = swaggerJsDocs(swaggerOptions);
-
-(async () => {
-  try {
-    debug("Port set to:", getVariableSync("PORT") as number);
-
-    await bot.startExpressServer({
-      webhookVerifyToken: getVariableSync("SECRET_WEBHOOK") as string,
-      port: (getVariableSync("PORT") as number) || 8082,
-      useMiddleware: (app) => {
-        // config
-        app.use(cors());
-        app.use(logger("dev"));
-        app.use(express.json());
-        app.use(cookieParser());
-        app.use("/app/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocs));
-        app.use(express.static(path.join(__dirname, "../static")));
-        app.use((_req, res, next) => {
-          res.header("Access-Control-Allow-Origin", "*");
-          res.header(
-            "Access-Control-Allow-Headers",
-            "Authorization, X-API-KEY, Origin, X-Requested-With," +
-              "Content-Type, Accept, Access-Control-Allow-Request-Method"
-          );
-          res.header(
-            "Access-Control-Allow-Methods",
-            "GET, POST, OPTIONS, PUT, DELETE"
-          );
-          res.header("Allow", "GET, POST, OPTIONS, PUT, DELETE");
-          next();
-        });
-        app.use(
-          actuator({
-            basePath: "/management",
-          })
-        );
-
-        // controllers
-        app.use(fullApiPath, MessageControllers);
-      },
-    });
-
-    // Listen to ALL incoming messages
-    // NOTE: remember to always run: await bot.startExpressServer() first
-    bot.on("message", async (msg) => {
-      console.log(msg);
-
-      if (msg.type === "text") {
-        console.log("Mensaje recibido");
-        await bot.sendText(msg.from, "Received your text message!");
-      }
-    });
-  } catch (error) {
-    debug("[ERROR] Could not start application: ", error);
-  }
-})();
+     default:
+       throw error
+   }
+ }
+ 
+ /**
+  * Event listener for HTTP server 'listening' event.
+  */
+ 
+ function onListening() {
+   const addr = (server as http.Server).address()
+   const bind = typeof addr === 'string' ? `pipe ${addr}` : `port ${(addr as any).port}`
+   debug(`Listening on ${bind}`)
+ }
+ 
+ export default server
+ 

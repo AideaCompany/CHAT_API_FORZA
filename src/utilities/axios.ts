@@ -7,3 +7,7 @@ export const axiosInstance = axios.create({
     Authorization: `Bearer ${getVariableSync("BEARER_TOKEN")}`,
   },
 });
+
+export const axiosInstanceBack = axios.create({
+  baseURL: getVariableSync('BACKEND_URL')
+});
