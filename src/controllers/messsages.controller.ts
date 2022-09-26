@@ -4,13 +4,40 @@ import { getVariableSync } from "../config";
 import { axiosInstance } from "../utilities/axios";
 
 const router = Router();
-const debug = debugLib("Aidea:messagesController");
+const debug = debugLib("AIDEA:messagesController");
+
+
+
+/**
+ * @openapi
+ * /send_mssg:
+ *  post:
+ *    summary: Send a plain text message
+ *    tags:
+ *       - "Messages"
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/PlainText'
+ *    responses:
+ *      "200":
+ *        description: Message sent successfully
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/ResponseMessage'
+ *      "400":
+ *          description: Invalid Body
+ *
+ */
 
 router.post("/send_mssg", async (req: Request, res: Response) => {
   debug("Sending messages");
   try {
     const { to, mssg } = req.body;
-    await axiosInstance.post(`/${getVariableSync("PHONE_ID")}/messages`, {
+    const resp = await axiosInstance.post(`/${getVariableSync("PHONE_ID")}/messages`, {
       messaging_product: "whatsapp",
       recipient_type: "individual",
       to: to,
@@ -21,12 +48,38 @@ router.post("/send_mssg", async (req: Request, res: Response) => {
       }
     })
 
-    res.status(200).json({ ok: true });
+    res.status(200).json({ ok: true, resp:resp.data });
   } catch (error) {
     console.error(error);
     res.status(500).json({ ok: false });
   }
 });
+
+
+/**
+ * @openapi
+ * /send_template:
+ *  post:
+ *    summary: Send a plain text message
+ *    tags:
+ *       - "Messages"
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/Template'
+ *    responses:
+ *      "200":
+ *        description: Message sent successfully
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/ResponseMessage'
+ *      "400":
+ *          description: Invalid Body
+ *
+ */
 
 router.post("/send_template", async (req: Request, res: Response) => {
   debug("Sending templates");
@@ -46,7 +99,6 @@ router.post("/send_template", async (req: Request, res: Response) => {
         components
       }
     })
-    console.log(resp.data)
     // await bot.sendTemplate(to, template, lang);
     res.status(200).json({ ok: true, resp: resp.data });
   } catch (error) {

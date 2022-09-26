@@ -5,11 +5,11 @@ import { getVariableSync } from "../config";
 import { updateSentMssgLink } from "../services/link.service";
 
 const router = Router();
-const debug = debugLib("Aidea:messagesController");
+const debug = debugLib("AIDEA:messagesController");
 
 router.post("/webhook/whatsapp", async (req: Request, res: Response) => {
+  try {
   debug("webhook");
-
   // Check the Incoming webhook message
   // console.log(JSON.stringify(req.body, null, 2));
 
@@ -23,14 +23,16 @@ router.post("/webhook/whatsapp", async (req: Request, res: Response) => {
       req.body.entry[0].changes[0].value.statuses[0]
     ) {
 
-    const newStatus = req.body.entry[0].changes[0].value.statuses[0]
-    console.log(newStatus.id)
-    console.log(newStatus.status)
-    await updateSentMssgLink({mssgId: newStatus.id, ack: newStatus.status})
+    // const newStatus = req.body.entry[0].changes[0].value.statuses[0]
+    // await updateSentMssgLink({mssgId: newStatus.id, ack: newStatus.status})
     }
     res.sendStatus(200);
+  
   } else {
     // Return a '404 Not Found' if event is not from a WhatsApp API
+    res.sendStatus(404);
+  }}
+  catch (error) {
     res.sendStatus(404);
   }
 

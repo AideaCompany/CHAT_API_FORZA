@@ -17,15 +17,15 @@ const swaggerOptions = {
         title: "WHATSAPP API",
         description: "Endpoints WhatsApp API Aidea",
         contact: {
-          name: "Sergio Sanchez",
+          name: "Sergio Alejandro Sanchez Ortiz",
         },
         version: "0.0.1",
       },
-      // servers: [
-      //   {
-      //     url: `${getVariableSync('BACKEND_URL')}${getVariableSync('API_PATH')}/V1`
-      //   }
-      // ]
+      servers: [
+        {
+          url: `${getVariableSync('BACKEND_URL')}`
+        }
+      ]
     },
     apis: [`${__dirname}/controllers/*.js`, `${__dirname}/swagger/*.js`],
   };

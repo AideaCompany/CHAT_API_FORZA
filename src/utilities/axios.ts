@@ -9,5 +9,5 @@ export const axiosInstance = axios.create({
 });
 
 export const axiosInstanceBack = axios.create({
-  baseURL: getVariableSync('BACKEND_URL_V1')
+  baseURL: getVariableSync('BACKEND_URL')
 });
